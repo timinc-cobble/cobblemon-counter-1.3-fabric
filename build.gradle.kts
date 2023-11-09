@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "us.timinc.mc.cobblemon.counter"
-version = "1.1.1"
+version = "1.2.0"
 
 architectury {
     platformSetupLoomIde()
