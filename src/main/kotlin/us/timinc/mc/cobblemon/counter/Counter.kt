@@ -23,10 +23,16 @@ import us.timinc.mc.cobblemon.counter.store.CaptureStreak
 import us.timinc.mc.cobblemon.counter.store.KoCount
 import us.timinc.mc.cobblemon.counter.store.KoStreak
 import java.util.*
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+import us.timinc.mc.cobblemon.counter.config.CounterConfig
 
 object Counter : ModInitializer {
     @Suppress("unused")
     const val MOD_ID = "cobbled_counter"
+
+    private var logger: Logger = LogManager.getLogger(MOD_ID)
+    private var config : CounterConfig = CounterConfig.Builder.load()
 
     override fun onInitialize() {
         PlayerDataExtensionRegistry.register(KoCount.NAME, KoCount::class.java)
@@ -117,6 +123,8 @@ object Counter : ModInitializer {
             data.extraData.getOrPut(CaptureStreak.NAME) { CaptureStreak() } as CaptureStreak
         captureStreak.add(species)
 
+        info("Player ${event.player.displayName.string} captured a $species")
+
         Cobblemon.playerData.saveSingle(data)
     }
 
@@ -135,6 +143,8 @@ object Counter : ModInitializer {
 
                 koCount.add(species)
                 koStreak.add(species)
+
+                info("Player ${player.displayName.string} KO'd a $species")
             }
 
             Cobblemon.playerData.saveSingle(data)
@@ -176,6 +186,11 @@ object Counter : ModInitializer {
     fun getPlayerCaptureCount(player: Player, species: String): Int {
         val playerData = Cobblemon.playerData.get(player)
         return (playerData.extraData.getOrPut(CaptureCount.NAME) { CaptureCount() } as CaptureCount).get(species)
+    }
+
+    fun info(msg: String) {
+        if (!config.debug) return
+        logger.info(msg)
     }
 }
 
