@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "us.timinc.mc.cobblemon.counter"
-version = "1.3-fabric-1.2.1"
+version = "1.3-fabric-1.3.0"
 
 architectury {
     platformSetupLoomIde()
