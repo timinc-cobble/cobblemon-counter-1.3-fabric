@@ -43,89 +43,72 @@ object Counter : ModInitializer {
         CobblemonEvents.POKEMON_CAPTURED.subscribe { handlePokemonCapture(it) }
         CobblemonEvents.BATTLE_VICTORY.subscribe { handleWildDefeat(it) }
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
-            dispatcher.register(
-                literal<CommandSourceStack>("counter")
+            dispatcher.register(literal<CommandSourceStack>("counter").then(literal<CommandSourceStack>("ko").then(
+                literal<CommandSourceStack>("count").then(argument<CommandSourceStack, Species>(
+                    "species", PokemonArgumentType.pokemon()
+                ).then(argument<CommandSourceStack, EntitySelector>(
+                    "player", EntityArgument.player()
+                ).executes { KoCountCommand.withPlayer(it) })
+                    .executes { KoCountCommand.withoutPlayer(it) })
+            )
+                .then(literal<CommandSourceStack>("streak").then(argument<CommandSourceStack?, EntitySelector?>(
+                    "player", EntityArgument.player()
+                ).executes { KoStreakCommand.withPlayer(it) }).executes { KoStreakCommand.withoutPlayer(it) })
+                .then(literal<CommandSourceStack>("total").then(argument<CommandSourceStack?, EntitySelector?>(
+                    "player", EntityArgument.player()
+                ).executes { KoTotalCommand.withPlayer(it) }).executes { KoTotalCommand.withoutPlayer(it) })
+                .then(literal<CommandSourceStack>("reset").requires { source -> source.hasPermission(2) }
                     .then(
-                        literal<CommandSourceStack>("ko")
-                            .then(
-                                literal<CommandSourceStack>("count")
-                                    .then(
-                                        argument<CommandSourceStack, Species>(
-                                            "species",
-                                            PokemonArgumentType.pokemon()
-                                        )
-                                            .then(
-                                                argument<CommandSourceStack, EntitySelector>(
-                                                    "player",
-                                                    EntityArgument.player()
-                                                )
-                                                    .executes { KoCountCommand.withPlayer(it) }
-                                            )
-                                            .executes { KoCountCommand.withoutPlayer(it) }
-                                    )
-                            )
-                            .then(
-                                literal<CommandSourceStack>("streak")
-                                    .then(
-                                        argument<CommandSourceStack?, EntitySelector?>(
-                                            "player",
-                                            EntityArgument.player()
-                                        )
-                                            .executes { KoStreakCommand.withPlayer(it) }
-                                    )
-                                    .executes { KoStreakCommand.withoutPlayer(it) }
-                            ).then(
-                                literal<CommandSourceStack>("total")
-                                    .then(
-                                        argument<CommandSourceStack?, EntitySelector?>(
-                                            "player",
-                                            EntityArgument.player()
-                                        )
-                                            .executes { KoTotalCommand.withPlayer(it) }
-                                    )
-                                    .executes { KoTotalCommand.withoutPlayer(it) }
-                            )
+                        literal<CommandSourceStack>("count").then(argument<CommandSourceStack?, EntitySelector?>(
+                            "player", EntityArgument.player()
+                        ).executes { KoResetCommand.resetCount(it) })
                     )
                     .then(
-                        literal<CommandSourceStack>("capture")
-                            .then(
-                                literal<CommandSourceStack>("count")
-                                    .then(
-                                        argument<CommandSourceStack?, Species?>(
-                                            "species",
-                                            PokemonArgumentType.pokemon()
-                                        )
-                                            .then(
-                                                argument<CommandSourceStack?, EntitySelector?>(
-                                                    "player",
-                                                    EntityArgument.player()
-                                                )
-                                                    .executes { CaptureCountCommand.withPlayer(it) }
-                                            )
-                                            .executes { CaptureCountCommand.withoutPlayer(it) }
-                                    )
-                            ).then(
-                                literal<CommandSourceStack>("streak")
-                                    .then(
-                                        argument<CommandSourceStack?, EntitySelector?>(
-                                            "player",
-                                            EntityArgument.player()
-                                        )
-                                            .executes { CaptureStreakCommand.withPlayer(it) }
-                                    )
-                                    .executes { CaptureStreakCommand.withoutPlayer(it) }
-                            ).then(
-                                literal<CommandSourceStack>("total")
-                                    .then(
-                                        argument<CommandSourceStack?, EntitySelector?>(
-                                            "player",
-                                            EntityArgument.player()
-                                        )
-                                            .executes { CaptureTotalCommand.withPlayer(it) }
-                                    )
-                                    .executes { CaptureTotalCommand.withoutPlayer(it) }
-                            )
+                        literal<CommandSourceStack>("streak").then(argument<CommandSourceStack?, EntitySelector?>(
+                            "player", EntityArgument.player()
+                        ).executes { KoResetCommand.resetStreak(it) })
                     )
+                    .then(
+                        literal<CommandSourceStack>("all").then(argument<CommandSourceStack?, EntitySelector?>(
+                            "player", EntityArgument.player()
+                        ).executes { KoResetCommand.reset(it) })
+                    )
+                )
+            )
+                .then(literal<CommandSourceStack>("capture").then(
+                    literal<CommandSourceStack>("count").then(argument<CommandSourceStack?, Species?>(
+                        "species", PokemonArgumentType.pokemon()
+                    ).then(argument<CommandSourceStack?, EntitySelector?>(
+                        "player", EntityArgument.player()
+                    ).executes { CaptureCountCommand.withPlayer(it) })
+                        .executes { CaptureCountCommand.withoutPlayer(it) })
+                )
+                    .then(literal<CommandSourceStack>("streak").then(argument<CommandSourceStack?, EntitySelector?>(
+                        "player", EntityArgument.player()
+                    ).executes { CaptureStreakCommand.withPlayer(it) })
+                        .executes { CaptureStreakCommand.withoutPlayer(it) })
+                    .then(literal<CommandSourceStack>("total").then(argument<CommandSourceStack?, EntitySelector?>(
+                        "player", EntityArgument.player()
+                    ).executes { CaptureTotalCommand.withPlayer(it) })
+                        .executes { CaptureTotalCommand.withoutPlayer(it) })
+                    .then(literal<CommandSourceStack>("reset").requires { source -> source.hasPermission(2) }
+                        .then(
+                            literal<CommandSourceStack>("count").then(argument<CommandSourceStack?, EntitySelector?>(
+                                "player", EntityArgument.player()
+                            ).executes { CaptureResetCommand.resetCount(it) })
+                        )
+                        .then(
+                            literal<CommandSourceStack>("streak").then(argument<CommandSourceStack?, EntitySelector?>(
+                                "player", EntityArgument.player()
+                            ).executes { CaptureResetCommand.resetStreak(it) })
+                        )
+                        .then(
+                            literal<CommandSourceStack>("all").then(argument<CommandSourceStack?, EntitySelector?>(
+                                "player", EntityArgument.player()
+                            ).executes { CaptureResetCommand.reset(it) })
+                        )
+                    )
+                )
             )
         }
     }
