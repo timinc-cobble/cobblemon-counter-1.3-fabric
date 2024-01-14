@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
+import net.minecraft.network.chat.Component
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import us.timinc.mc.cobblemon.counter.command.*
@@ -132,6 +133,13 @@ object Counter : ModInitializer {
                 )
             })"
         )
+        if (config.broadcastCapturesToPlayer) {
+            event.player.sendSystemMessage(
+                Component.translatable(
+                    "counter.capture.confirm", species, captureCount.get(species), captureStreak.count
+                )
+            )
+        }
 
         Cobblemon.playerData.saveSingle(data)
     }
@@ -159,6 +167,13 @@ object Counter : ModInitializer {
                         )
                     })"
                 )
+                if (config.broadcastKosToPlayer) {
+                    player.sendSystemMessage(
+                        Component.translatable(
+                            "counter.ko.confirm", species, koCount.get(species), koStreak.count
+                        )
+                    )
+                }
             }
 
             Cobblemon.playerData.saveSingle(data)
